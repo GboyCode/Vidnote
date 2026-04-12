@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vidnotes 用户管理</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+            background: linear-gradient(135deg, #dbeafe 0%, #ffffff 50%, #f3e8ff 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(229, 231, 235, 0.3);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: rgba(248, 250, 252, 0.5);
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(8px);
+            padding: 25px;
+            border-radius: 16px;
+            border: 1px solid rgba(229, 231, 235, 0.3);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #2563eb;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: #64748b;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            position: relative;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 12px 40px 12px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 12px;
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.8);
+            transition: all 0.2s ease;
+        }
+        
+        .search-box input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+        }
+        
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+            font-size: 12px;
+            padding: 8px 16px;
+        }
+        
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+        
+        .table-container {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(8px);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid rgba(229, 231, 235, 0.3);
+        }
+        
+        th {
+            background: rgba(248, 250, 252, 0.8);
+            font-weight: 600;
+            color: #374151;
+            font-size: 14px;
+        }
+        
+        td {
+            color: #4b5563;
+        }
+        
+        tr:hover {
+            background: rgba(248, 250, 252, 0.5);
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            margin-right: 12px;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-details h4 {
+            margin: 0;
+            font-size: 14px;
+            color: #1f2937;
+        }
+        
+        .user-details p {
+            margin: 2px 0 0 0;
+            font-size: 12px;
+            color: #6b7280;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+        }
+        
+        .error {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+        }
+        
+        .empty-state h3 {
+            margin-bottom: 10px;
+            color: #374151;
+        }
+        
+        .role-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            text-align: center;
+        }
+        
+        .role-admin {
+            background: #fef3c7;
+            color: #d97706;
+            border: 1px solid #fbbf24;
+        }
+        
+        .role-user {
+            background: #e0f2fe;
+            color: #0369a1;
+            border: 1px solid #38bdf8;
+        }
+        
+        .text-muted {
+            color: #9ca3af;
+            font-style: italic;
+        }
+        
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-box {
+                min-width: auto;
+            }
+            
+            table {
+                font-size: 14px;
+            }
+            
+            th, td {
+                padding: 12px 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎥 Vidnotes</h1>
+            <p>用户管理控制台</p>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalUsers">-</div>
+                <div class="stat-label">总用户数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="todayUsers">-</div>
+                <div class="stat-label">今日注册</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="weekUsers">-</div>
+                <div class="stat-label">本周注册</div>
+            </div>
+        </div>
+        
+        <div class="content">
+            <div class="controls">
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="搜索用户名或邮箱...">
+                </div>
+                <button class="btn btn-primary" onclick="refreshData()">🔄 刷新数据</button>
+            </div>
+            
+            <div id="errorMessage" class="error" style="display: none;"></div>
+            
+            <div class="table-container">
+                <div id="loading" class="loading">
+                    <p>正在加载用户数据...</p>
+                </div>
+                
+                <div id="emptyState" class="empty-state" style="display: none;">
+                    <h3>暂无用户数据</h3>
+                    <p>还没有用户注册，等待第一个用户加入吧！</p>
+                </div>
+                
+                <table id="usersTable" style="display: none;">
+                    <thead>
+                        <tr>
+                            <th>用户</th>
+                            <th>邮箱</th>
+                            <th>角色</th>
+                            <th>注册时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let allUsers = [];
+        
+        // 页面加载时获取数据
+        document.addEventListener('DOMContentLoaded', function() {
+            // 检查URL参数中是否有token
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlToken = urlParams.get('token');
+            
+            if (urlToken) {
+                // 如果URL中有token，保存到localStorage
+                localStorage.setItem('token', urlToken);
+                // 清除URL中的token参数，避免敏感信息暴露
+                const newUrl = window.location.pathname;
+                window.history.replaceState({}, document.title, newUrl);
+            }
+            
+            // 检查是否已登录
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert('请先登录');
+                // 根据当前域名动态生成登录页面URL
+                const currentHost = window.location.hostname;
+                const loginUrl = currentHost === 'localhost' ? 'http://localhost:5173/login' : `https://${currentHost}/login`;
+                window.location.href = loginUrl;
+                return;
+            }
+            
+            loadUsers();
+            
+            // 搜索功能
+            document.getElementById('searchInput').addEventListener('input', function(e) {
+                filterUsers(e.target.value);
+            });
+        });
+        
+        // 加载用户数据
+        async function loadUsers() {
+            try {
+                showLoading();
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/admin/users', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        localStorage.removeItem('token');
+                        alert('登录已过期，请重新登录');
+                        // 根据当前域名动态生成登录页面URL
+                        const currentHost = window.location.hostname;
+                        const loginUrl = currentHost === 'localhost' ? 'http://localhost:5173/login' : `https://${currentHost}/login`;
+                        window.location.href = loginUrl;
+                        return;
+                    }
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                allUsers = data.users || [];
+                
+                updateStats(data.stats);
+                displayUsers(allUsers);
+                hideLoading();
+                
+            } catch (error) {
+                console.error('加载用户数据失败:', error);
+                showError('加载用户数据失败: ' + error.message);
+                hideLoading();
+            }
+        }
+        
+        // 更新统计数据
+        function updateStats(stats) {
+            document.getElementById('totalUsers').textContent = stats?.total || 0;
+            document.getElementById('todayUsers').textContent = stats?.today || 0;
+            document.getElementById('weekUsers').textContent = stats?.week || 0;
+        }
+        
+        // 显示用户列表
+        function displayUsers(users) {
+            const tableBody = document.getElementById('usersTableBody');
+            const table = document.getElementById('usersTable');
+            const emptyState = document.getElementById('emptyState');
+            
+            if (!users || users.length === 0) {
+                table.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            emptyState.style.display = 'none';
+            table.style.display = 'table';
+            
+            tableBody.innerHTML = users.map(user => {
+                const avatar = user.username.charAt(0).toUpperCase();
+                const createdAt = new Date(user.created_at).toLocaleString('zh-CN');
+                const roleText = user.role === 'admin' ? '管理员' : '用户';
+                const roleClass = user.role === 'admin' ? 'role-admin' : 'role-user';
+                const canDelete = user.role !== 'admin';
+                
+                return `
+                    <tr>
+                        <td>
+                            <div class="user-info">
+                                <div class="user-avatar">${avatar}</div>
+                                <div class="user-details">
+                                    <h4>${escapeHtml(user.username)}</h4>
+                                    <p>ID: ${user.id}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td>${escapeHtml(user.email)}</td>
+                        <td><span class="role-badge ${roleClass}">${roleText}</span></td>
+                        <td>${createdAt}</td>
+                        <td>
+                            ${canDelete ? 
+                                `<button class="btn btn-danger" onclick="deleteUser(${user.id}, '${escapeHtml(user.username)}')">删除</button>` : 
+                                `<span class="text-muted">不可删除</span>`
+                            }
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+        
+        // 过滤用户
+        function filterUsers(searchTerm) {
+            if (!searchTerm.trim()) {
+                displayUsers(allUsers);
+                return;
+            }
+            
+            const filtered = allUsers.filter(user => 
+                user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                user.email.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            
+            displayUsers(filtered);
+        }
+        
+        // 删除用户
+        async function deleteUser(userId, username) {
+            if (!confirm(`确定要删除用户 "${username}" 吗？此操作不可撤销。`)) {
+                return;
+            }
+            
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`/api/admin/users/${userId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('用户删除成功');
+                    loadUsers(); // 重新加载数据
+                } else {
+                    throw new Error(result.message || '删除失败');
+                }
+                
+            } catch (error) {
+                console.error('删除用户失败:', error);
+                alert('删除用户失败: ' + error.message);
+            }
+        }
+        
+        // 刷新数据
+        function refreshData() {
+            document.getElementById('searchInput').value = '';
+            loadUsers();
+        }
+        
+        // 显示加载状态
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('usersTable').style.display = 'none';
+            document.getElementById('emptyState').style.display = 'none';
+            hideError();
+        }
+        
+        // 隐藏加载状态
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+        
+        // 显示错误信息
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+        
+        // 隐藏错误信息
+        function hideError() {
+            document.getElementById('errorMessage').style.display = 'none';
+        }
+        
+        // HTML转义
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
