@@ -1,6 +1,7 @@
 node_modules/
 .env
 .env.production
+database.db
 tmp/
 *.log
 *.tsbuildinfo
